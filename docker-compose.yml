@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: safarika_db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: safarika_user
+      MONGO_INITDB_ROOT_PASSWORD: safarika_password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: safarika_api
+    environment:
+      MONGODB_URI: mongodb://safarika_user:safarika_password@mongodb:27017/safarika?authSource=admin
+      NODE_ENV: development
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: npm run dev
+
+volumes:
+  mongo_data:
