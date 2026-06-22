@@ -1,0 +1,23 @@
+const express = require('express');
+const router = express.Router();
+const { fetchMarketDemand } = require('../services/comtradeService');
+
+router.post('/', async (req, res) => {
+  const { hsCode, period } = req.body;
+
+  if (!hsCode) {
+    return res.status(400).json({ error: 'hsCode is required' });
+  }
+
+  const result = await fetchMarketDemand(hsCode, period);
+
+  res.json({
+    hsCode,
+    period: period || (new Date().getFullYear() - 1).toString(),
+    source: result.source,
+    fetchedAt: result.fetchedAt,
+    data: result.data
+  });
+});
+
+module.exports = router;
