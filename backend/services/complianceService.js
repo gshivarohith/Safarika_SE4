@@ -36,9 +36,14 @@ Write a short, friendly explanation (3-5 sentences) in simple English that:
 3. Flags any country restriction if present
 Do not use bullet points. Write as a short paragraph.`;
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-  const result = await model.generateContent(prompt);
-  const explanation = result.response.text().trim();
+  let explanation = null;
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await model.generateContent(prompt);
+    explanation = result.response.text().trim();
+  } catch (err) {
+    console.error('Gemini unavailable, returning raw rules:', err.message);
+  }
 
   return {
     hsChapter,
@@ -47,7 +52,6 @@ Do not use bullet points. Write as a short paragraph.`;
     prohibitedCountries: rule.prohibitedCountries,
     destinationCountry: destinationCountry || null,
     restricted: !!countryWarning,
-    notes: rule.notes,
     explanation
   };
 }
