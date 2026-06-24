@@ -3,8 +3,9 @@ const router = express.Router();
 
 router.use('/market-demand', require('./marketDemand'));
 router.use('/classify',     require('./classify'));
+router.use('/compliance-check', require('./compliance'));
 
-// Phase 3: POST /api/compliance-check
+// Phase 4: POST /api/translate
 // Phase 4: POST /api/translate
 // Phase 6: POST /api/auth/signup, /api/auth/login
 
