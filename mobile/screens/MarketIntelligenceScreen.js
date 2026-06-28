@@ -33,9 +33,22 @@ export default function MarketIntelligenceScreen({ route, navigation }) {
     try {
       const res = await axios.post(`${API_URL}/market-demand`, { hsCode });
       const raw = res.data.data?.data || [];
-      const sorted = raw
-        .filter(r => r.primaryValue)
-        .sort((a, b) => b.primaryValue - a.primaryValue);
+      const byReporter = {};
+      raw.forEach(r => {
+        const key = r.reporterCode;
+        if (!byReporter[key]) {
+          byReporter[key] = {
+            name: r.reporterDesc || r.reporterISO || String(r.reporterCode || ''),
+            total: 0,
+            netWgt: 0,
+          };
+        }
+        byReporter[key].total += (r.primaryValue || 0);
+        byReporter[key].netWgt += (r.netWgt || 0);
+      });
+      const sorted = Object.values(byReporter)
+        .filter(r => r.total > 0)
+        .sort((a, b) => b.total - a.total);
       setRecords(sorted);
       setPeriod(res.data.period);
     } catch (err) {
@@ -73,10 +86,13 @@ export default function MarketIntelligenceScreen({ route, navigation }) {
           <View key={index} style={styles.card}>
             <View style={styles.cardRow}>
               <Text style={styles.rank}>#{index + 1}</Text>
-              <Text style={styles.country}>
-                {item.reporterDesc || item.reporter || item.reporterISO || item.reporterCode || 'Unknown'}
-              </Text>
-              <Text style={styles.value}>{formatValue(item.primaryValue)}</Text>
+              <View style={styles.cardMid}>
+                <Text style={styles.country}>{item.name}</Text>
+                {item.netWgt > 0 && (
+                  <Text style={styles.weight}>{(item.netWgt / 1000).toFixed(1)} t net wt</Text>
+                )}
+              </View>
+              <Text style={styles.value}>{formatValue(item.total)}</Text>
             </View>
           </View>
         ))}
@@ -121,7 +137,9 @@ const styles = StyleSheet.create({
   },
   cardRow: { flexDirection: 'row', alignItems: 'center' },
   rank: { fontSize: 16, fontWeight: 'bold', color: '#1F4788', width: 32 },
-  country: { flex: 1, fontSize: 15, color: '#333' },
+  cardMid: { flex: 1 },
+  country: { fontSize: 15, color: '#333' },
+  weight: { fontSize: 12, color: '#888', marginTop: 2 },
   value: { fontSize: 15, fontWeight: '600', color: '#1F4788' },
   button: {
     backgroundColor: '#1F4788',

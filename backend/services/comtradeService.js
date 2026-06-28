@@ -10,7 +10,7 @@ const DEFAULT_REPORTERS = '842,784,826,276,156';
 async function fetchMarketDemand(hsCode, period) {
   const cleanCode = hsCode.replace(/\./g, '');
   const year = period || (new Date().getFullYear() - 1).toString();
-  const cacheKey = `${cleanCode}-${year}`;
+  const cacheKey = `${cleanCode}-${year}-W`;
 
   const cached = await TradeData.findOne({
     cacheKey,
@@ -27,6 +27,7 @@ async function fetchMarketDemand(hsCode, period) {
       period: year,
       flowCode: 'M',
       reporterCode: DEFAULT_REPORTERS,
+      partnerCode: 0,
       maxRecords: 50,
       'subscription-key': process.env.COMTRADE_API_KEY
     },
@@ -34,7 +35,6 @@ async function fetchMarketDemand(hsCode, period) {
   });
 
   const data = response.data;
-  if (data?.data?.length > 0) console.log('Comtrade sample record keys:', Object.keys(data.data[0]));
 
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + CACHE_TTL_DAYS);
