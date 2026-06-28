@@ -73,7 +73,9 @@ export default function MarketIntelligenceScreen({ route, navigation }) {
           <View key={index} style={styles.card}>
             <View style={styles.cardRow}>
               <Text style={styles.rank}>#{index + 1}</Text>
-              <Text style={styles.country}>{item.reporterDesc}</Text>
+              <Text style={styles.country}>
+                {item.reporterDesc || item.reporter || item.reporterISO || item.reporterCode || 'Unknown'}
+              </Text>
               <Text style={styles.value}>{formatValue(item.primaryValue)}</Text>
             </View>
           </View>

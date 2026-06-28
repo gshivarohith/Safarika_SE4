@@ -34,6 +34,7 @@ async function fetchMarketDemand(hsCode, period) {
   });
 
   const data = response.data;
+  if (data?.data?.length > 0) console.log('Comtrade sample record keys:', Object.keys(data.data[0]));
 
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + CACHE_TTL_DAYS);
