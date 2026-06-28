@@ -16,6 +16,7 @@ export default function LoginScreen({ navigation }) {
       return;
     }
     setError('');
+    navigation.navigate('ProductEntry');
   };
 
   return (
