@@ -12,7 +12,6 @@ export default function ProductEntryScreen({ navigation }) {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [result, setResult] = useState(null);
 
   const classify = async () => {
     if (!description.trim()) {
@@ -20,11 +19,10 @@ export default function ProductEntryScreen({ navigation }) {
       return;
     }
     setError('');
-    setResult(null);
     setLoading(true);
     try {
       const res = await axios.post(`${API_URL}/classify`, { productDescription: description });
-      setResult(res.data);
+      navigation.navigate('HSCodeResults', { result: res.data });
     } catch (err) {
       setError(err.response?.data?.error || 'Classification failed. Please try again.');
     } finally {
@@ -68,14 +66,6 @@ export default function ProductEntryScreen({ navigation }) {
           }
         </TouchableOpacity>
 
-        {result ? (
-          <View style={styles.resultBox}>
-            <Text style={styles.resultLabel}>HS Code</Text>
-            <Text style={styles.resultCode}>{result.hsCode}</Text>
-            <Text style={styles.resultDesc}>{result.description}</Text>
-            <Text style={styles.resultExplanation}>{result.explanation}</Text>
-          </View>
-        ) : null}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -116,14 +106,4 @@ const styles = StyleSheet.create({
   errorText: { color: '#d32f2f', fontSize: 13 },
   retryButton: { marginTop: 8 },
   retryText: { color: '#d32f2f', fontSize: 13, fontWeight: '600' },
-  resultBox: {
-    backgroundColor: '#e8f0fe',
-    borderRadius: 8,
-    padding: 16,
-    marginTop: 24,
-  },
-  resultLabel: { fontSize: 12, color: '#1F4788', fontWeight: '600', marginBottom: 4 },
-  resultCode: { fontSize: 28, fontWeight: 'bold', color: '#1F4788', marginBottom: 4 },
-  resultDesc: { fontSize: 15, color: '#333', marginBottom: 8 },
-  resultExplanation: { fontSize: 13, color: '#555', fontStyle: 'italic' },
 });
