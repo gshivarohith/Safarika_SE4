@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
 import ProductEntryScreen from './screens/ProductEntryScreen';
 import HSCodeResultsScreen from './screens/HSCodeResultsScreen';
+import MarketIntelligenceScreen from './screens/MarketIntelligenceScreen';
 
 const Stack = createStackNavigator();
 
@@ -14,6 +15,7 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="ProductEntry" component={ProductEntryScreen} />
         <Stack.Screen name="HSCodeResults" component={HSCodeResultsScreen} />
+        <Stack.Screen name="MarketIntelligence" component={MarketIntelligenceScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

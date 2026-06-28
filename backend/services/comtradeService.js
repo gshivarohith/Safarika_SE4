@@ -8,8 +8,9 @@ const CACHE_TTL_DAYS = 7;
 const DEFAULT_REPORTERS = '842,784,826,276,156';
 
 async function fetchMarketDemand(hsCode, period) {
+  const cleanCode = hsCode.replace(/\./g, '');
   const year = period || (new Date().getFullYear() - 1).toString();
-  const cacheKey = `${hsCode}-${year}`;
+  const cacheKey = `${cleanCode}-${year}`;
 
   const cached = await TradeData.findOne({
     cacheKey,
@@ -22,7 +23,7 @@ async function fetchMarketDemand(hsCode, period) {
 
   const response = await axios.get(BASE_URL, {
     params: {
-      cmdCode: hsCode,
+      cmdCode: cleanCode,
       period: year,
       flowCode: 'M',
       reporterCode: DEFAULT_REPORTERS,
@@ -39,7 +40,7 @@ async function fetchMarketDemand(hsCode, period) {
 
   await TradeData.findOneAndUpdate(
     { cacheKey },
-    { cacheKey, hsCode, period: year, data, fetchedAt: new Date(), expiresAt },
+    { cacheKey, hsCode: cleanCode, period: year, data, fetchedAt: new Date(), expiresAt },
     { upsert: true, new: true }
   );
 
