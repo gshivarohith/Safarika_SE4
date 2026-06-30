@@ -6,6 +6,7 @@ import ProductEntryScreen from './screens/ProductEntryScreen';
 import HSCodeResultsScreen from './screens/HSCodeResultsScreen';
 import MarketIntelligenceScreen from './screens/MarketIntelligenceScreen';
 import DestinationPickerScreen from './screens/DestinationPickerScreen';
+import ComplianceChecklistScreen from './screens/ComplianceChecklistScreen';
 
 const Stack = createStackNavigator();
 
@@ -18,6 +19,7 @@ export default function App() {
         <Stack.Screen name="HSCodeResults" component={HSCodeResultsScreen} />
         <Stack.Screen name="MarketIntelligence" component={MarketIntelligenceScreen} />
         <Stack.Screen name="DestinationPicker" component={DestinationPickerScreen} />
+        <Stack.Screen name="ComplianceChecklist" component={ComplianceChecklistScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
