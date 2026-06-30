@@ -27,10 +27,10 @@ Product description: "${productDescription}"
 Shortlist of HS codes to choose from:
 ${shortlist}
 
-Reply in this exact JSON format (no markdown, no explanation outside JSON):
+Reply in this exact JSON format (no markdown, no text outside the JSON object):
 {
-  "hsCode": "<6-digit code from shortlist>",
-  "description": "<description text from shortlist>",
+  "hsCode": "<copy the exact code from the shortlist, character for character>",
+  "description": "<copy the exact description from the shortlist>",
   "explanation": "<one sentence explaining why this code fits the product>"
 }`;
 
@@ -38,19 +38,21 @@ Reply in this exact JSON format (no markdown, no explanation outside JSON):
   const result = await model.generateContent(prompt);
   const text   = result.response.text().trim();
 
-  // Strip possible markdown code fences
-  const jsonText = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-  const parsed   = JSON.parse(jsonText);
+  // Extract the JSON object robustly, ignoring any surrounding text or fences
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON found in Gemini response');
+  const parsed = JSON.parse(jsonMatch[0]);
 
-  // Validate Gemini didn't stray outside the shortlist
-  const validCodes = candidates.map(c => c.code);
-  if (!validCodes.includes(parsed.hsCode)) {
+  // Validate Gemini didn't stray outside the shortlist (dot-insensitive comparison)
+  const normalize = code => code.replace(/\./g, '');
+  const matched = candidates.find(c => normalize(c.code) === normalize(parsed.hsCode));
+  if (!matched) {
     throw new Error(`Gemini returned an HS code not in the shortlist: ${parsed.hsCode}`);
   }
 
   return {
-    hsCode:      parsed.hsCode,
-    description: parsed.description,
+    hsCode:      matched.code,
+    description: matched.description,
     explanation: parsed.explanation,
     candidatesConsidered: candidates.length
   };
