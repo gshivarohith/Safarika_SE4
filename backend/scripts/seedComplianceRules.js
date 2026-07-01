@@ -22,7 +22,7 @@ const rules = [
     chapterDescription: 'Cereals (rice, wheat, maize)',
     documentsRequired: ['APEDA Registration', 'Phytosanitary Certificate', 'GST Registration'],
     prohibitedCountries: [],
-    notes: 'Non-basmati white rice export subject to MEP and government quota — check DGFT policy before shipment.'
+    notes: 'Non-basmati white rice export subject to MEP and government quota, check DGFT policy before shipment.'
   },
   {
     hsChapter: '21',
@@ -99,7 +99,7 @@ const rules = [
     chapterDescription: 'Vehicles and parts',
     documentsRequired: ['DGFT Export Licence', 'Type Approval Certificate', 'GST Registration', 'IEC'],
     prohibitedCountries: ['North Korea', 'Russia'],
-    notes: 'Certain vehicle parts are under SCOMET — verify before export.'
+    notes: 'Certain vehicle parts are under SCOMET, verify before export.'
   },
   {
     hsChapter: '90',
@@ -120,7 +120,7 @@ async function seed() {
       rule,
       { upsert: true, new: true }
     );
-    console.log(`Upserted chapter ${rule.hsChapter} — ${rule.chapterDescription}`);
+    console.log(`Upserted chapter ${rule.hsChapter}, ${rule.chapterDescription}`);
   }
 
   console.log('Compliance rules seeded.');

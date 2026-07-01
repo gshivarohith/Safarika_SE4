@@ -13,8 +13,8 @@ app.use(express.json());
 
 // Health Check Endpoint
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'ok', 
+  res.status(200).json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
@@ -27,7 +27,7 @@ const connectDB = async () => {
       console.log('MONGODB_URI not set. Running in demo mode (no database).');
       return;
     }
-    
+
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true
@@ -39,7 +39,7 @@ const connectDB = async () => {
   }
 };
 
-// Routes Placeholder
+// Routes
 app.use('/api', require('./routes/index'));
 
 // Error Handling Middleware

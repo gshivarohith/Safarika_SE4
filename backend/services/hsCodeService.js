@@ -17,10 +17,10 @@ async function classifyProduct(productDescription) {
     candidates = await HSCode.find({}).limit(15);
   }
 
-  // 2. Build shortlist for Gemini — never let it invent codes
-  const shortlist = candidates.map(c => `${c.code} — ${c.description}`).join('\n');
+  // 2. Build shortlist for Gemini, never let it invent codes
+  const shortlist = candidates.map(c => `${c.code}, ${c.description}`).join('\n');
 
-  const prompt = `You are an HS code classification assistant. You must ONLY choose from the shortlist below — never invent or suggest a code not in this list.
+  const prompt = `You are an HS code classification assistant. You must ONLY choose from the shortlist below, never invent or suggest a code not in this list.
 
 Product description: "${productDescription}"
 

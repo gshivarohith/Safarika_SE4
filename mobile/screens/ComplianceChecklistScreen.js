@@ -45,7 +45,7 @@ export default function ComplianceChecklistScreen({ route, navigation }) {
             <Text style={styles.sectionTitle}>Documents Required</Text>
             {documentsRequired.map((doc, i) => (
               <View key={i} style={styles.docRow}>
-                <Text style={styles.bullet}>•</Text>
+                <Text style={styles.bullet}>-</Text>
                 <Text style={styles.docText}>{doc}</Text>
               </View>
             ))}

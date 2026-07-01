@@ -65,10 +65,10 @@ docker-compose up -d
 | Method | Endpoint | Status |
 |--------|----------|--------|
 | GET | `/api/health` | live |
-| POST | `/api/market-demand` | Phase 1 |
-| POST | `/api/classify` | Phase 2 |
-| POST | `/api/compliance-check` | Phase 3 |
-| POST | `/api/translate` | Phase 4 |
+| POST | `/api/market-demand` | live |
+| POST | `/api/classify` | live |
+| POST | `/api/compliance-check` | live |
+| POST | `/api/translate` | live |
 
 ## Deployment
 

@@ -24,7 +24,7 @@ async function checkCompliance(hsCode, destinationCountry) {
 
   const prompt = `You are an export compliance advisor helping a small Indian business owner (MSME) understand what they need to export their product.
 
-HS Chapter: ${hsChapter} — ${rule.chapterDescription}
+HS Chapter: ${hsChapter}, ${rule.chapterDescription}
 ${destinationCountry ? `Destination country: ${destinationCountry}` : ''}
 Documents required: ${rule.documentsRequired.join(', ')}
 ${rule.notes ? `Additional notes: ${rule.notes}` : ''}
