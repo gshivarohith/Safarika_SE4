@@ -16,7 +16,8 @@ async function translateText(text, targetLanguage) {
 Text: ${text}`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    // Fix: changed model to gemini-1.5-flash (valid model name)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const result = await model.generateContent(prompt);
     return {
       originalText: text,

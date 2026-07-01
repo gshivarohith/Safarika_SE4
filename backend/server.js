@@ -12,7 +12,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Updated health check to match mobile requirements
+// Main API Routes
+app.use('/api', require('./routes/index.js'));
+
+// Health check specifically for mobile verification
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -32,9 +35,8 @@ mongoose.connect(MONGODB_URI)
   })
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err.message);
-    // For development, we'll start the server even if DB connection fails
-    // so you can at least see the health status.
+    // Start server even if DB connection fails for health checks
     app.listen(PORT, () => {
-      console.log(`📡 Server running on port ${PORT} (Database disconnected)`);
+      console.log(`📡 Server running on port ${PORT} (Database connection failed)`);
     });
   });

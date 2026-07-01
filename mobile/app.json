@@ -2,7 +2,7 @@
   "expo": {
     "name": "Safarika",
     "slug": "safarika",
-    "version": "0.3.0",
+    "version": "0.6.0",
     "orientation": "portrait",
     "scheme": "safarika",
     "updates": {
@@ -16,7 +16,7 @@
     },
     "android": {
       "package": "com.safarika.app",
-      "versionCode": 3
+      "versionCode": 6
     },
     "web": {
     },

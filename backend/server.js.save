@@ -1,0 +1,52 @@
+// 1. Force Node to prioritize IPv4 loopback resolution for local Docker/Mongoose stability
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('express-async-errors');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Import your application routes here
+const classifyRoutes = require('./routes/classify');
+const complianceRoutes = require('./routes/compliance');
+const marketDemandRoutes = require('./routes/marketDemand');
+const translateRoutes = require('./routes/translate');
+
+app.use('/api', classifyRoutes);
+app.use('/api', complianceRoutes);
+app.use('/api', marketDemandRoutes);
+app.use('/api', translateRoutes);
+
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+   
+ status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Database Connection Pipeline
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/safarika';
+
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('🚀 MongoDB connected successfully to local Docker interface'))
+  .catch((err) => {
+    console.error('❌ MongoDB connection error:', err.message);
+    process.exit(1); 
+  });
+
+// Start listening for traffic
+app.listen(PORT, () => {
+  console.log(`📡 Server running on port ${PORT}`);
+});

@@ -34,7 +34,8 @@ Reply in this exact JSON format (no markdown, no explanation outside JSON):
   "explanation": "<one sentence explaining why this code fits the product>"
 }`;
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  // Fix: changed model to gemini-1.5-flash (valid model name)
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
   const result = await model.generateContent(prompt);
   const text   = result.response.text().trim();
 
