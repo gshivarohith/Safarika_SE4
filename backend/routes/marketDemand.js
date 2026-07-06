@@ -1,8 +1,9 @@
+const auth = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();
 const { fetchMarketDemand } = require('../services/comtradeService');
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   const { hsCode, period } = req.body;
 
   if (!hsCode) {
