@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+router.use('/auth', require('./auth'));
 router.use('/market-demand', require('./marketDemand'));
 router.use('/classify',     require('./classify'));
 router.use('/compliance-check', require('./compliance'));

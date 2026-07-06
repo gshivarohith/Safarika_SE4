@@ -1,4 +1,6 @@
 require('dotenv').config();
+const errorHandler = require('./middleware/errorHandler');
+const morgan = require('morgan');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
 // Health Check Endpoint
 app.get('/api/health', (req, res) => {
@@ -43,13 +46,7 @@ const connectDB = async () => {
 app.use('/api', require('./routes/index'));
 
 // Error Handling Middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
-  res.status(err.status || 500).json({
-    error: err.message,
-    timestamp: new Date().toISOString()
-  });
-});
+app.use(errorHandler);
 
 // 404 Handler
 app.use((req, res) => {
