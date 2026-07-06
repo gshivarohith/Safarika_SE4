@@ -6,11 +6,31 @@ const CACHE_TTL_DAYS = 7;
 
 // Top importing country codes to query (USA, UAE, UK, Germany, China)
 const DEFAULT_REPORTERS = '842,784,826,276,156';
+const REPORTER_NAMES = {
+  842: 'United States',
+  784: 'United Arab Emirates',
+  826: 'United Kingdom',
+  276: 'Germany',
+  156: 'China',
+};
+
+function withReporterNames(data) {
+  if (!data?.data?.length) return data;
+  return {
+    ...data,
+    data: data.data
+      .filter((record) => REPORTER_NAMES[record.reporterCode])
+      .map((record) => ({
+        ...record,
+        reporterDesc: REPORTER_NAMES[record.reporterCode],
+      })),
+  };
+}
 
 async function fetchMarketDemand(hsCode, period) {
   const cleanCode = hsCode.replace(/\./g, '');
   const year = period || (new Date().getFullYear() - 1).toString();
-  const cacheKey = `${cleanCode}-${year}-W`;
+  const cacheKey = `${cleanCode}-${year}-W3`;
 
   const cached = await TradeData.findOne({
     cacheKey,
@@ -28,13 +48,16 @@ async function fetchMarketDemand(hsCode, period) {
       flowCode: 'M',
       reporterCode: DEFAULT_REPORTERS,
       partnerCode: 0,
+      partner2Code: 0,
+      motCode: 0,
+      customsCode: 'C00',
       maxRecords: 50,
       'subscription-key': process.env.COMTRADE_API_KEY
     },
     timeout: 10000
   });
 
-  const data = response.data;
+  const data = withReporterNames(response.data);
 
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + CACHE_TTL_DAYS);
