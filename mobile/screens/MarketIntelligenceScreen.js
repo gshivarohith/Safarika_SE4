@@ -4,6 +4,7 @@ import {
   ScrollView, ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProgressBar from '../components/ProgressBar';
 
 const API_URL = 'http://10.0.2.2:3000/api';
@@ -31,7 +32,12 @@ export default function MarketIntelligenceScreen({ route, navigation }) {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post(`${API_URL}/market-demand`, { hsCode });
+      const token = await AsyncStorage.getItem('token');
+      const res = await axios.post(
+        `${API_URL}/market-demand`,
+        { hsCode },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
       const raw = res.data.data?.data || [];
       const byReporter = {};
       raw.forEach(r => {
