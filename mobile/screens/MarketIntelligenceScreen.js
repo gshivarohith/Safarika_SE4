@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator,
+  ScrollView, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import axios from 'axios';
 import ProgressBar from '../components/ProgressBar';
@@ -19,67 +19,48 @@ function formatValue(value) {
 export default function MarketIntelligenceScreen({ route, navigation }) {
   const { hsCode } = route.params;
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [records, setRecords] = useState([]);
-  const [period, setPeriod] = useState('');
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    setLoading(true);
     setError('');
     try {
       const res = await axios.post(`${API_URL}/market-demand`, { hsCode });
-      const raw = res.data.data?.data || [];
-      const byReporter = {};
-      raw.forEach(r => {
-        const key = r.reporterCode;
-        if (!byReporter[key]) {
-          byReporter[key] = {
-            name: r.reporterDesc || r.reporterISO || String(r.reporterCode || ''),
-            total: 0,
-            netWgt: 0,
-          };
-        }
-        byReporter[key].total += (r.primaryValue || 0);
-        byReporter[key].netWgt += (r.netWgt || 0);
-      });
-      const sorted = Object.values(byReporter)
-        .filter(r => r.total > 0)
-        .sort((a, b) => b.total - a.total);
-      setRecords(sorted);
-      setPeriod(res.data.period);
+      // Use the 'records' array sent by the optimized backend
+      setRecords(res.data.records || []);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load market data. Please try again.');
+      setError(err.response?.data?.error || 'Market data unavailable. Is backend running?');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => {setRefreshing(true); fetchData();}} />}
+    >
       <ProgressBar step={4} total={8} />
       <View style={styles.body}>
         <Text style={styles.title}>Market Intelligence</Text>
-        <Text style={styles.subtitle}>
-          Top importing countries for HS Code {hsCode} ({period})
-        </Text>
+        <Text style={styles.subtitle}>Top global importers for HS Code {hsCode}</Text>
 
         {loading && <ActivityIndicator size="large" color="#1F4788" style={styles.loader} />}
 
         {error ? (
           <View style={styles.errorBox}>
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity onPress={fetchData} style={styles.retryButton}>
-              <Text style={styles.retryText}>Retry</Text>
-            </TouchableOpacity>
           </View>
         ) : null}
 
         {!loading && !error && records.length === 0 && (
-          <Text style={styles.noData}>No trade data found for this HS code.</Text>
+          <Text style={styles.noData}>No specific trade data found for this category.</Text>
         )}
 
         {records.map((item, index) => (
@@ -88,21 +69,18 @@ export default function MarketIntelligenceScreen({ route, navigation }) {
               <Text style={styles.rank}>#{index + 1}</Text>
               <View style={styles.cardMid}>
                 <Text style={styles.country}>{item.name}</Text>
-                {item.netWgt > 0 && (
-                  <Text style={styles.weight}>{(item.netWgt / 1000).toFixed(1)} t net wt</Text>
-                )}
               </View>
-              <Text style={styles.value}>{formatValue(item.total)}</Text>
+              <Text style={styles.value}>{formatValue(item.value)}</Text>
             </View>
           </View>
         ))}
 
-        {!loading && !error && (
+        {!loading && (
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate('DestinationPicker', { hsCode })}
           >
-            <Text style={styles.buttonText}>Pick Export Destination</Text>
+            <Text style={styles.buttonText}>Select Destination</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -111,42 +89,20 @@ export default function MarketIntelligenceScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
   body: { padding: 24, paddingBottom: 40 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#1F4788', marginBottom: 6 },
-  subtitle: { fontSize: 14, color: '#666', marginBottom: 24 },
+  title: { fontSize: 24, fontWeight: 'bold', color: '#1F4788' },
+  subtitle: { fontSize: 14, color: '#64748B', marginBottom: 24, marginTop: 4 },
   loader: { marginVertical: 40 },
-  errorBox: {
-    backgroundColor: '#ffebee',
-    borderLeftColor: '#d32f2f',
-    borderLeftWidth: 4,
-    padding: 12,
-    borderRadius: 6,
-    marginBottom: 16,
-  },
-  errorText: { color: '#d32f2f', fontSize: 13 },
-  retryButton: { marginTop: 8 },
-  retryText: { color: '#d32f2f', fontSize: 13, fontWeight: '600' },
-  noData: { color: '#888', fontSize: 14, textAlign: 'center', marginVertical: 40 },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 10,
-    elevation: 1,
-  },
+  errorBox: { backgroundColor: '#fee2e2', padding: 16, borderRadius: 12, marginBottom: 20 },
+  errorText: { color: '#dc2626', fontSize: 14, fontWeight: '600' },
+  noData: { color: '#94A3B8', textAlign: 'center', marginVertical: 40 },
+  card: { backgroundColor: '#fff', borderRadius: 16, padding: 20, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10 },
   cardRow: { flexDirection: 'row', alignItems: 'center' },
-  rank: { fontSize: 16, fontWeight: 'bold', color: '#1F4788', width: 32 },
+  rank: { fontSize: 16, fontWeight: 'bold', color: '#1F4788', width: 35 },
   cardMid: { flex: 1 },
-  country: { fontSize: 15, color: '#333' },
-  weight: { fontSize: 12, color: '#888', marginTop: 2 },
-  value: { fontSize: 15, fontWeight: '600', color: '#1F4788' },
-  button: {
-    backgroundColor: '#1F4788',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  country: { fontSize: 16, color: '#1E293B', fontWeight: '700' },
+  value: { fontSize: 16, fontWeight: '800', color: '#059669' },
+  button: { backgroundColor: '#1F4788', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 24 },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
 });

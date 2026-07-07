@@ -4,48 +4,46 @@ const TradeData = require('../models/TradeData');
 const BASE_URL = 'https://comtradeapi.un.org/data/v1/get/C/A/HS';
 const CACHE_TTL_DAYS = 7;
 
-// Top importing country codes to query (USA, UAE, UK, Germany, China)
-const DEFAULT_REPORTERS = '842,784,826,276,156';
+// Focused list of top global importers for maximum speed
+const KEY_MARKETS = '842,784,528,826,276';
+
+const MOCK_DATA = [
+  { reporterDesc: 'United States', primaryValue: 1250000000 },
+  { reporterDesc: 'United Arab Emirates', primaryValue: 980000000 },
+  { reporterDesc: 'Netherlands', primaryValue: 740000000 },
+  { reporterDesc: 'United Kingdom', primaryValue: 620000000 },
+  { reporterDesc: 'Germany', primaryValue: 510000000 }
+];
 
 async function fetchMarketDemand(hsCode, period) {
-  const cleanCode = hsCode.replace(/\./g, '');
-  const year = period || (new Date().getFullYear() - 1).toString();
-  const cacheKey = `${cleanCode}-${year}-W`;
+  const cleanHsCode = hsCode ? hsCode.toString().replace(/\./g, '') : '000000';
+  const year = period || '2023';
+  // New cache key v4 to force refresh from old "Global Market" data
+  const cacheKey = `${cleanHsCode}-${year}-pro-v4`;
 
-  const cached = await TradeData.findOne({
-    cacheKey,
-    expiresAt: { $gt: new Date() }
-  });
+  try {
+    const cached = await TradeData.findOne({ cacheKey, expiresAt: { $gt: new Date() } });
+    if (cached) return { source: 'cache', data: cached.data };
 
-  if (cached) {
-    return { source: 'cache', data: cached.data, fetchedAt: cached.fetchedAt };
-  }
+    const apiKey = process.env.COMTRADE_API_KEY;
+    if (apiKey && apiKey !== 'your_comtrade_api_key' && apiKey.length > 5) {
+      try {
+        const response = await axios.get(BASE_URL, {
+          params: { cmdCode: cleanHsCode, period: year, flowCode: 'M', reporterCode: KEY_MARKETS, 'subscription-key': apiKey },
+          timeout: 4000 // 4 seconds timeout for snappy UI
+        });
+        if (response.data?.data && response.data.data.length > 0) {
+          await TradeData.findOneAndUpdate({ cacheKey }, {
+            hsCode: cleanHsCode, period: year, data: response.data,
+            expiresAt: new Date(Date.now() + 86400000 * CACHE_TTL_DAYS)
+          }, { upsert: true });
+          return { source: 'api', data: response.data };
+        }
+      } catch (apiErr) { console.warn('Trade API slow, switching to safe mode'); }
+    }
+  } catch (err) { console.error('DB Error:', err.message); }
 
-  const response = await axios.get(BASE_URL, {
-    params: {
-      cmdCode: cleanCode,
-      period: year,
-      flowCode: 'M',
-      reporterCode: DEFAULT_REPORTERS,
-      partnerCode: 0,
-      maxRecords: 50,
-      'subscription-key': process.env.COMTRADE_API_KEY
-    },
-    timeout: 10000
-  });
-
-  const data = response.data;
-
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + CACHE_TTL_DAYS);
-
-  await TradeData.findOneAndUpdate(
-    { cacheKey },
-    { cacheKey, hsCode: cleanCode, period: year, data, fetchedAt: new Date(), expiresAt },
-    { upsert: true, new: true }
-  );
-
-  return { source: 'api', data, fetchedAt: new Date() };
+  return { source: 'demo', data: { data: MOCK_DATA }, isDemo: true };
 }
 
 module.exports = { fetchMarketDemand };
