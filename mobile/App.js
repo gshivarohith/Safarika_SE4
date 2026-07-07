@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
@@ -11,6 +12,9 @@ import MarketIntelligenceScreen from './screens/MarketIntelligenceScreen';
 import DestinationPickerScreen from './screens/DestinationPickerScreen';
 import ComplianceChecklistScreen from './screens/ComplianceChecklistScreen';
 import DocumentReadinessScreen from './screens/DocumentReadinessScreen';
+import ExportFinalScreen from './screens/ExportFinalScreen';
+import LogisticsScreen from './screens/LogisticsScreen';
+import TranslatorScreen from './screens/TranslatorScreen';
 
 const Stack = createStackNavigator();
 
@@ -28,6 +32,9 @@ export default function App() {
         <Stack.Screen name="DestinationPicker" component={DestinationPickerScreen} />
         <Stack.Screen name="ComplianceChecklist" component={ComplianceChecklistScreen} />
         <Stack.Screen name="DocumentReadiness" component={DocumentReadinessScreen} />
+        <Stack.Screen name="ExportFinal" component={ExportFinalScreen} />
+        <Stack.Screen name="Logistics" component={LogisticsScreen} />
+        <Stack.Screen name="Translator" component={TranslatorScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
