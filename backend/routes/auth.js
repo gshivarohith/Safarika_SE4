@@ -167,4 +167,45 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({
+        message: 'Please provide email, otp and newPassword'
+      });
+    }
+
+    const user = await User.findOne({
+      email,
+      resetOtp: otp,
+      resetOtpExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: 'Invalid or expired reset code'
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetOtp = null;
+    user.resetOtpExpires = null;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: 'Server Error'
+    });
+  }
+});
+
 module.exports = router;
