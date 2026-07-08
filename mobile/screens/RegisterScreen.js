@@ -29,7 +29,7 @@ export default function RegisterScreen({ navigation }) {
         password,
       });
       await AsyncStorage.setItem('token', res.data.token);
-      navigation.navigate('ProductEntry');
+      navigation.navigate('Home');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {

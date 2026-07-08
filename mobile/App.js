@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import HomeScreen from './screens/HomeScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import ProductEntryScreen from './screens/ProductEntryScreen';
 import HSCodeResultsScreen from './screens/HSCodeResultsScreen';
@@ -21,6 +22,7 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="ProductEntry" component={ProductEntryScreen} />
         <Stack.Screen name="HSCodeResults" component={HSCodeResultsScreen} />
         <Stack.Screen name="MarketIntelligence" component={MarketIntelligenceScreen} />

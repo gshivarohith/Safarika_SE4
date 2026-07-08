@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }) {
         password,
       });
       await AsyncStorage.setItem('token', res.data.token);
-      navigation.navigate('ProductEntry');
+      navigation.navigate('Home');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
