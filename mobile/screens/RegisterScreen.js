@@ -4,7 +4,7 @@ import {
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 const API_URL = 'http://10.0.2.2:3000/api';
 
@@ -12,7 +12,9 @@ export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
@@ -23,13 +25,12 @@ export default function RegisterScreen({ navigation }) {
     setError('');
     setLoading(true);
     try {
-      const res = await axios.post(`${API_URL}/auth/register`, {
+      await axios.post(`${API_URL}/auth/register`, {
         name: name.trim(),
         email: email.trim(),
         password,
       });
-      await AsyncStorage.setItem('token', res.data.token);
-      navigation.navigate('Home');
+      setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
@@ -46,46 +47,71 @@ export default function RegisterScreen({ navigation }) {
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Join Safarika to start exporting</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Name"
-          placeholderTextColor="#aaa"
-          value={name}
-          onChangeText={setName}
-        />
+        {success ? (
+          <View style={styles.successBox}>
+            <Text style={styles.successText}>
+              Account created successfully. Please log in to continue.
+            </Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.buttonText}>Back to Login</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Name"
+              placeholderTextColor="#aaa"
+              value={name}
+              onChangeText={setName}
+            />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#aaa"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#aaa"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+            />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#aaa"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+            <View style={styles.passwordWrapper}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Password"
+                placeholderTextColor="#aaa"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowPassword((prev) => !prev)}
+              >
+                <Ionicons
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={20}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Register</Text>
-          )}
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Register</Text>
+              )}
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.linkButton} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.linkText}>Already have an account? Login</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.linkButton} onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.linkText}>Already have an account? Login</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
@@ -121,6 +147,37 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 15,
     color: '#333',
+    marginBottom: 16,
+  },
+  passwordWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: '#333',
+  },
+  eyeButton: {
+    paddingHorizontal: 12,
+  },
+  successBox: {
+    backgroundColor: '#d4edda',
+    borderRadius: 8,
+    padding: 16,
+  },
+  successText: {
+    color: '#155724',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
     marginBottom: 16,
   },
   error: {
