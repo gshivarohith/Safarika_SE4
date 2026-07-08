@@ -21,10 +21,16 @@ export default function App() {
   const [initialRouteName, setInitialRouteName] = useState('Login');
 
   useEffect(() => {
-    AsyncStorage.getItem('token').then((token) => {
-      setInitialRouteName(token ? 'Home' : 'Login');
-      setCheckingSession(false);
-    });
+    AsyncStorage.getItem('token')
+      .then((token) => {
+        setInitialRouteName(token ? 'Home' : 'Login');
+      })
+      .catch(() => {
+        setInitialRouteName('Login');
+      })
+      .finally(() => {
+        setCheckingSession(false);
+      });
   }, []);
 
   if (checkingSession) {
