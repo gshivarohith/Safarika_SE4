@@ -2,6 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import ProductEntryScreen from './screens/ProductEntryScreen';
 import HSCodeResultsScreen from './screens/HSCodeResultsScreen';
 import MarketIntelligenceScreen from './screens/MarketIntelligenceScreen';
@@ -15,6 +17,8 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
         <Stack.Screen name="ProductEntry" component={ProductEntryScreen} />
         <Stack.Screen name="HSCodeResults" component={HSCodeResultsScreen} />
         <Stack.Screen name="MarketIntelligence" component={MarketIntelligenceScreen} />
