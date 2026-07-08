@@ -39,18 +39,4 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Forgot Password (Placeholder for demo)
-router.post('/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    // In a real app, you'd send an email with a reset link
-    res.json({ message: 'Password reset instructions sent to your email.' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 module.exports = router;

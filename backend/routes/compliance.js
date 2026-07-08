@@ -1,9 +1,10 @@
 const express = require('express');
 const router  = express.Router();
 const { checkCompliance } = require('../services/complianceService');
+const { logActivity } = require('../services/activityService');
 
 router.post('/', async (req, res) => {
-  const { hsCode, destinationCountry } = req.body;
+  const { hsCode, destinationCountry, userEmail, userName } = req.body;
 
   if (!hsCode) {
     return res.status(400).json({ error: 'hsCode is required' });
@@ -11,6 +12,15 @@ router.post('/', async (req, res) => {
 
   try {
     const result = await checkCompliance(hsCode, destinationCountry);
+
+    // Log activity for Admin
+    await logActivity(
+      userEmail || 'Guest',
+      userName || 'Guest',
+      'Compliance Check',
+      `HS Code: ${hsCode} | Country: ${destinationCountry || 'Not Specified'}`
+    );
+
     res.json(result);
   } catch (err) {
     console.error('compliance-check error:', err.message);

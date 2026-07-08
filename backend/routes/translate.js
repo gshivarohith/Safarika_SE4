@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { translateText, SUPPORTED_LANGUAGES } = require('../services/translationService');
+const { logActivity } = require('../services/activityService');
 
 router.post('/', async (req, res) => {
-  const { text, targetLanguage } = req.body;
+  const { text, targetLanguage, userEmail, userName } = req.body;
 
   if (!text) {
     return res.status(400).json({ error: 'text is required' });
@@ -14,6 +15,15 @@ router.post('/', async (req, res) => {
 
   try {
     const result = await translateText(text, targetLanguage);
+
+    // Log activity for Admin
+    await logActivity(
+      userEmail || 'Guest',
+      userName || 'Guest',
+      'Translation',
+      `Translated text to ${targetLanguage}`
+    );
+
     res.json(result);
   } catch (err) {
     console.error('translate error:', err.message);

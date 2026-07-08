@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { fetchMarketDemand } = require('../services/comtradeService');
+const { logActivity } = require('../services/activityService');
 
-// Map of UN codes to names to ensure specific labels in the UI
+// Map of common UN codes to names to guarantee UI quality
 const COUNTRY_NAME_MAP = {
   '842': 'United States',
   '784': 'United Arab Emirates',
@@ -16,43 +17,49 @@ const COUNTRY_NAME_MAP = {
 };
 
 router.post('/', async (req, res) => {
-  const { hsCode } = req.body;
+  const { hsCode, userEmail, userName } = req.body;
   if (!hsCode) return res.status(400).json({ error: 'hsCode is required' });
 
   try {
-    console.log(`📊 Compiling Fast-Market Report for: ${hsCode}`);
+    console.log(`📊 Generating Intelligence Report for: ${hsCode}`);
     const result = await fetchMarketDemand(hsCode);
-
-    // The raw data from UN Comtrade is in result.data.data
     const raw = result.data?.data || [];
 
-    // Clean and Normalize names
+    // Clean and Normalize: Identify specific countries and their trade values
     const cleanRecords = raw.map(item => {
-      // Prioritize: 1. Our map, 2. reporterDesc (e.g. "USA"), 3. reporterName
-      let name = COUNTRY_NAME_MAP[String(item.reporterCode)] || item.reporterDesc || item.reporterName || item.text;
+      // Resolve Name: Prioritize specific map, then API description
+      let name = COUNTRY_NAME_MAP[String(item.reporterCode)] || item.reporterDesc || item.reporterName;
       const value = item.primaryValue || item.tradeValue || 0;
 
-      // Filter out generic "World" entries and zero values
+      // Filter out generic totals like 'World' or empty names
       if (!name || name.toLowerCase().includes('world') || value <= 0) return null;
 
-      // Clean text like "United States of America" -> "United States"
+      // Clean names like "United States of America" -> "United States"
       name = name.split(',')[0].split('(')[0].trim();
 
       return { name, value };
     }).filter(r => r !== null);
 
-    // Sort by largest and limit to Top 5 for speed and clarity
+    // Limit to TOP 5 biggest markets for maximum speed
     const top5 = cleanRecords.sort((a, b) => b.value - a.value).slice(0, 5);
+
+    // Log activity for Admin in Real-Time
+    await logActivity(
+      userEmail || 'Guest',
+      userName || 'Guest',
+      'Market Demand Check',
+      `HS Code: ${hsCode} | Top Market: ${top5[0]?.name || 'N/A'}`
+    );
 
     res.json({
       hsCode,
       records: top5,
       period: '2023',
-      isDemo: result.source === 'demo'
+      source: result.source
     });
   } catch (err) {
-    console.error('Market Demand Route Error:', err.message);
-    res.status(500).json({ error: 'Trade database busy. Please try again.' });
+    console.error('Market Demand Error:', err.message);
+    res.status(500).json({ error: 'Database link busy. Please try again.' });
   }
 });
 
