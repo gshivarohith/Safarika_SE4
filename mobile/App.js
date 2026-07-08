@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './screens/LoginScreen';
@@ -15,9 +17,27 @@ import ComplianceChecklistScreen from './screens/ComplianceChecklistScreen';
 const Stack = createStackNavigator();
 
 export default function App() {
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [initialRouteName, setInitialRouteName] = useState('Login');
+
+  useEffect(() => {
+    AsyncStorage.getItem('token').then((token) => {
+      setInitialRouteName(token ? 'Home' : 'Login');
+      setCheckingSession(false);
+    });
+  }, []);
+
+  if (checkingSession) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#1F4788" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRouteName}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
@@ -32,3 +52,12 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
